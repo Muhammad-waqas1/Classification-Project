@@ -22,22 +22,26 @@ df = df.drop(columns=['Email No.'])
 numeric_cols = df.select_dtypes(include=['number']).columns
 non_numeric_cols = df.select_dtypes(exclude=['number']).columns
 
-# Handle missing values
+# Handle missing values in numeric columns
 imputer = SimpleImputer(strategy='mean')
-df_filled = pd.DataFrame(imputer.fit_transform(df))
-df_filled.columns = df.columns
+df[numeric_cols] = imputer.fit_transform(df[numeric_cols])
 
-# Encode categorical variables if any (assuming all are numerical here, so skipping this step)
-# If there were categorical variables, you would use OneHotEncoder or LabelEncoder
+#Assume all non-numeric columns are categorical
+if not non_numeric_cols.empty:
+    for col in non_numeric_cols:
+        le = LabelEncoder()
+        df[col] = le.fit_transform(df[col])
 
 # Separate features and target variable
-X = df_filled.drop('Prediction', axis=1)
-y = df_filled['Prediction']
+X = df.drop('Prediction', axis=1)
+y = df['Prediction']
 
+# Scale numerical features
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Model Selection
+# Step 2: Model Selection
+# Initialize models
 models = {
     'Logistic Regression': LogisticRegression(),
     'Decision Tree': DecisionTreeClassifier(),
@@ -57,10 +61,8 @@ for name, model in models.items():
 
     model.fit(X_train, y_train)
     
-    # Predictions
     y_pred = model.predict(X_test)
     
-    # Evaluation
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred, average='weighted')
     recall = recall_score(y_test, y_pred, average='weighted')
@@ -78,7 +80,6 @@ for name, model in models.items():
         'Cross-Validation Score': cv_score
     }
     
-    # Print the classification report
     print(f"Model: {name}")
     print(classification_report(y_test, y_pred))
     print(f"Cross-Validation Score: {cv_score}\n")
@@ -87,7 +88,7 @@ for name, model in models.items():
 performance_df = pd.DataFrame(model_performance).T
 print(performance_df)
 
-# Step 5: Hyperparameter Tuning (Example with Random Forest)
+# Step 5: Hyperparameter Tuning with Random Forest
 param_grid = {
     'n_estimators': [100, 200, 300],
     'max_depth': [None, 10, 20, 30],
@@ -99,7 +100,6 @@ param_grid = {
 grid_search = GridSearchCV(RandomForestClassifier(), param_grid, cv=5, scoring='f1_weighted', n_jobs=-1, verbose=2)
 grid_search.fit(X_train, y_train)
 
-# Best parameters and score
 print(f"Best Parameters: {grid_search.best_params_}")
 print(f"Best Score: {grid_search.best_score_}")
 

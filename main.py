@@ -11,16 +11,14 @@ emails = pd.read_csv('emails.csv')
 # Drop the 'Email No.' column
 emails = emails.drop(['Email No.'], axis=1)
 
-# Assuming you have a way to create labels (e.g., heuristic or pre-labeled dataset)
-# For demonstration, let's create a dummy label column
-
+# Dummy label column
 emails['Label'] = np.random.randint(2, size=len(emails))
 
 # Split the dataset into features and target
 X = emails.drop(['Label'], axis=1)
 y = emails['Label']
 
-# Split the dataset into training and testing sets
+# Training and testing of data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Scale the features
@@ -35,7 +33,6 @@ clf.fit(X_train_scaled, y_train)
 # Predict on the test set
 y_pred = clf.predict(X_test_scaled)
 
-# Evaluate the model
 print(f'Accuracy: {accuracy_score(y_test, y_pred)}')
 print(f'Precision: {precision_score(y_test, y_pred)}')
 print(f'Recall: {recall_score(y_test, y_pred)}')
@@ -47,7 +44,6 @@ from sklearn.ensemble import RandomForestClassifier
 clf_rf = RandomForestClassifier()
 clf_rf.fit(X_train, y_train)
 
-# Predict on the test set
 y_pred_rf = clf_rf.predict(X_test)
 
 # Evaluate the model
@@ -58,7 +54,7 @@ print(f'F1-Score: {f1_score(y_test, y_pred_rf)}')
 
 from sklearn.model_selection import GridSearchCV
 
-# Define the parameter grid
+# parameter grid
 param_grid = {
     'n_estimators': [50, 100, 200],
     'max_depth': [None, 10, 20, 30],
@@ -82,7 +78,6 @@ best_rf.fit(X_train, y_train)
 # Predict on the test set
 y_pred_best_rf = best_rf.predict(X_test)
 
-# Evaluate the model
 print(f'Accuracy: {accuracy_score(y_test, y_pred_best_rf)}')
 print(f'Precision: {precision_score(y_test, y_pred_best_rf)}')
 print(f'Recall: {recall_score(y_test, y_pred_best_rf)}')
